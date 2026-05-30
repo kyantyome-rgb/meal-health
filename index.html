@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2e7d32" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>ミール健康管理</title>
+</head>
+<body>
+  <header id="appHeader">
+    <span id="title">🍽️ ミール健康管理</span>
+    <span class="tagline">今日もおいしく、健康に 🌱</span>
+  </header>
+
+  <main>
+    <!-- ===== ホーム（AI傾向分析） ===== -->
+    <section id="screen-home" class="screen active">
+      <div class="todaycard">
+        <div class="label" id="homeDate">今日の摂取</div>
+        <div><span id="homeKcal" class="big">-</span> <span class="unit">kcal</span></div>
+        <div id="homeVsTarget" class="sub-label"></div>
+        <div class="bar"><div id="homeBar" class="bar-fill"></div></div>
+      </div>
+
+      <div class="aicard">
+        <div class="aihead">📈 最近の食事の傾向<button id="refreshAnalysis" class="mini">更新</button></div>
+        <div id="trendText" class="aibody">読み込み中…</div>
+      </div>
+      <div class="aicard reco">
+        <div class="aihead">💡 たまにはこういうのも</div>
+        <div id="recommendText" class="aibody"></div>
+      </div>
+      <div id="analysisMsg" class="msg"></div>
+    </section>
+
+    <!-- ===== 記録（撮影） ===== -->
+    <section id="screen-capture" class="screen">
+      <div class="cam">
+        <video id="video" playsinline muted></video>
+        <img id="shot" alt="撮影結果" />
+        <div class="cambtns">
+          <button id="open" class="sub">📷 カメラ起動</button>
+          <button id="snap" disabled>● 撮影（無音）</button>
+          <button id="retake" class="sub hidden">撮り直し</button>
+        </div>
+        <label class="filealt">またはアルバムから選ぶ
+          <input id="file" type="file" accept="image/*" />
+        </label>
+      </div>
+
+      <button id="send" class="full primary" disabled>カロリーを推定する</button>
+      <div id="msg" class="msg"></div>
+      <div id="result"></div>
+
+      <div id="saveArea" class="hidden">
+        <div class="row2">
+          <span>食事区分:</span>
+          <select id="mealType">
+            <option value="朝">朝</option><option value="昼">昼</option>
+            <option value="間食">間食</option><option value="晩">晩</option>
+          </select>
+        </div>
+        <input id="note" placeholder="メモ（任意）" />
+        <button id="save" class="full primary">✅ この内容で記録する</button>
+        <div id="saveMsg" class="msg"></div>
+      </div>
+    </section>
+
+    <!-- ===== グラフ / 分析 ===== -->
+    <section id="screen-graph" class="screen">
+      <div class="todaycard">
+        <div class="label">今日の摂取</div>
+        <div><span id="todayKcal" class="big">-</span> <span class="unit">kcal</span></div>
+        <div id="todayVsTarget" class="sub-label"></div>
+        <div class="bar"><div id="todayBar" class="bar-fill"></div></div>
+      </div>
+
+      <div class="periodtabs" id="periodTabs">
+        <button data-period="day" class="active">2週間</button>
+        <button data-period="week">週別</button>
+        <button data-period="month">月別</button>
+      </div>
+
+      <h3 id="chartTitle">摂取カロリー</h3>
+      <canvas id="chart" width="640" height="320"></canvas>
+      <div id="statsRow" class="stats"></div>
+
+      <h3>PFCバランス</h3>
+      <canvas id="pfcChart" width="640" height="280"></canvas>
+      <div id="pfcLegend" class="pfclegend"></div>
+
+      <h3>食事区分の割合</h3>
+      <canvas id="mealChart" width="640" height="280"></canvas>
+      <div id="mealLegend" class="pfclegend"></div>
+
+      <div id="graphMsg" class="msg"></div>
+    </section>
+
+    <!-- ===== 履歴 ===== -->
+    <section id="screen-history" class="screen">
+      <h3>記録の履歴</h3>
+      <div id="historyList"></div>
+      <div id="historyMsg" class="msg"></div>
+    </section>
+
+    <!-- ===== プロフィール ===== -->
+    <section id="screen-profile" class="screen">
+      <h3>接続設定</h3>
+      <label class="field">GAS Web App の /exec URL
+        <input id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec" />
+      </label>
+
+      <h3>プロフィール</h3>
+      <label class="field">年齢
+        <input id="p-age" type="number" min="1" max="120" inputmode="numeric" />
+      </label>
+      <label class="field">性別
+        <select id="p-sex"><option value="male">男性</option><option value="female">女性</option></select>
+      </label>
+      <label class="field">身長 (cm)
+        <input id="p-height" type="number" min="80" max="250" inputmode="decimal" />
+      </label>
+      <label class="field">体重 (kg)
+        <input id="p-weight" type="number" min="20" max="300" inputmode="decimal" />
+      </label>
+      <label class="field">活動量
+        <select id="p-activity">
+          <option value="low">ほぼ運動なし（デスクワーク中心）</option>
+          <option value="light">軽い運動（週1〜3回）</option>
+          <option value="moderate" selected>中程度（週3〜5回）</option>
+          <option value="high">激しい運動（週6〜7回）</option>
+          <option value="veryhigh">非常に激しい / 肉体労働</option>
+        </select>
+      </label>
+      <label class="field">目標
+        <select id="p-goal">
+          <option value="maintain" selected>維持</option>
+          <option value="diet">減量（-500kcal）</option>
+          <option value="bulk">増量（+300kcal）</option>
+        </select>
+      </label>
+
+      <button id="saveProfile" class="full primary">プロフィールを保存</button>
+      <div id="targetCard" class="targetcard hidden">
+        1日の目標カロリー: <span id="targetKcal" class="big">-</span> kcal
+      </div>
+      <div id="profileMsg" class="msg"></div>
+    </section>
+  </main>
+
+  <nav id="tabbar">
+    <button data-screen="home" class="active">🏠<span>ホーム</span></button>
+    <button data-screen="capture">📷<span>記録</span></button>
+    <button data-screen="graph">📊<span>グラフ</span></button>
+    <button data-screen="history">📜<span>履歴</span></button>
+    <button data-screen="profile">⚙️<span>設定</span></button>
+  </nav>
+
+  <div id="toastwrap"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
