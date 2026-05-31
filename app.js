@@ -107,7 +107,11 @@ function setPhoto(url) {
   sendBtn.disabled = false;
   msg.textContent = '撮影しました。「カロリーを推定する」を押してください。';
 }
-function stopCam() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
+function stopCam() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  video.style.display = 'none';
+  video.srcObject = null;
+}
 window.addEventListener('pagehide', stopCam);
 
 sendBtn.addEventListener('click', async () => {
@@ -158,7 +162,8 @@ function resetCapture() {
   items = []; dataUrl = null; captureTime = null;
   result.innerHTML = ''; saveArea.classList.add('hidden');
   shot.style.display = 'none'; shot.removeAttribute('src');
-  retakeBtn.classList.add('hidden');
+  video.style.display = 'none'; video.srcObject = null;
+  retakeBtn.classList.add('hidden'); snapBtn.disabled = true;
   sendBtn.disabled = true; saveMsg.textContent = '';
   msg.textContent = '記録しました 🎉 次の食事も撮影できます';
 }

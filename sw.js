@@ -1,5 +1,5 @@
 /* Service Worker — アプリシェルをキャッシュしてオフライン起動を可能にする */
-const CACHE = 'meal-health-v6';
+const CACHE = 'meal-health-v7';
 const SHELL = [
   './', './index.html', './styles.css', './app.js',
   './manifest.json', './icon-192.png', './icon-512.png'
