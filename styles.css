@@ -33,6 +33,28 @@ body {
 }
 #appHeader #title { font-weight: 800; font-size: 1.15rem; letter-spacing: .02em; display: block; }
 #appHeader .tagline { display: block; font-size: 0.72rem; opacity: .9; margin-top: 2px; font-weight: 500; }
+#appHeader .signout {
+  position: absolute; top: calc(16px + env(safe-area-inset-top)); right: 16px;
+  background: rgba(255,255,255,.18); color: #fff; font-size: .72rem; font-weight: 700;
+  padding: 6px 12px; border-radius: 999px; box-shadow: none;
+}
+#appHeader .signout:active { transform: scale(.95); background: rgba(255,255,255,.28); }
+
+/* ログインゲート */
+#login-gate {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--grad-soft); padding: 24px;
+}
+#login-gate.hidden { display: none !important; }
+.login-card {
+  background: #fff; border-radius: 22px; box-shadow: var(--card-sh);
+  padding: 36px 28px; max-width: 360px; width: 100%; text-align: center;
+}
+.login-emoji { font-size: 2.6rem; margin-bottom: 6px; }
+.login-card h1 { font-size: 1.15rem; margin: 0 0 10px; color: var(--ink); }
+.login-card p { font-size: 0.85rem; color: var(--gray); margin: 0 0 20px; line-height: 1.6; }
+#g_id_signin { display: flex; justify-content: center; }
 
 main { max-width: 540px; margin: 0 auto; padding: 16px; }
 h3 {

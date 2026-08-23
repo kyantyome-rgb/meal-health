@@ -7,6 +7,43 @@ const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c =>
 
 function getUrl() { return (localStorage.getItem('gasUrl') || '').trim(); }
 
+/* ========== Googleログイン ========== */
+// GAS 側の GOOGLE_CLIENT_ID（スクリプトプロパティ）と同じ値を設定すること。
+const GOOGLE_CLIENT_ID = '208601142364-t2gic8v49user4d4doe46b9hp6bktgm5.apps.googleusercontent.com';
+const ID_TOKEN_KEY = 'mealhealth_id_token';
+
+function idToken() { return sessionStorage.getItem(ID_TOKEN_KEY) || ''; }
+
+function showLoginGate(show) {
+  $('login-gate').classList.toggle('hidden', !show);
+  $('appHeader').classList.toggle('hidden', show);
+  document.querySelector('main').classList.toggle('hidden', show);
+  $('tabbar').classList.toggle('hidden', show);
+}
+
+async function handleCredentialResponse(response) {
+  sessionStorage.setItem(ID_TOKEN_KEY, response.credential);
+  showLoginGate(false);
+  await bootApp();
+}
+
+function signOut() {
+  sessionStorage.removeItem(ID_TOKEN_KEY);
+  showLoginGate(true);
+}
+
+function initGoogleSignIn() {
+  if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+    setTimeout(initGoogleSignIn, 300);
+    return;
+  }
+  google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
+  google.accounts.id.renderButton($('g_id_signin'), { theme: 'filled_black', size: 'large', shape: 'pill', text: 'signin_with' });
+  google.accounts.id.prompt();
+}
+
+$('signOutBtn').addEventListener('click', signOut);
+
 // GAS へ POST（CORSプリフライト回避のため text/plain）
 async function api(payload) {
   const url = getUrl();
@@ -14,10 +51,13 @@ async function api(payload) {
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(Object.assign({ idToken: idToken() }, payload))
   });
   const json = await res.json();
-  if (!json.ok) throw new Error(json.error || '不明なエラー');
+  if (!json.ok) {
+    if (json.auth) { signOut(); toast('⚠️ ログインが必要です。再度ログインしてください', 'error'); }
+    throw new Error(json.error || '不明なエラー');
+  }
   return json;
 }
 
@@ -646,10 +686,18 @@ $('historyList').addEventListener('click', async (e) => {
 });
 
 /* ========== 起動 ========== */
-(async () => {
+async function bootApp() {
   await loadProfile();   // targetKcal を取得してからホームを描画
   loadHome();
-})();
+}
+
+if (idToken()) {
+  showLoginGate(false);
+  bootApp();
+} else {
+  showLoginGate(true);
+}
+initGoogleSignIn();
 if ('serviceWorker' in navigator) {
   let reloading = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {

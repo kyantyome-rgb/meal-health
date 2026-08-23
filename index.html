@@ -7,15 +7,26 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <title>ミール健康管理</title>
 </head>
 <body>
-  <header id="appHeader">
+  <div id="login-gate">
+    <div class="login-card">
+      <div class="login-emoji">🍽️</div>
+      <h1>ミール健康管理</h1>
+      <p>このアプリを使うには、許可されたGoogleアカウントでログインしてください。</p>
+      <div id="g_id_signin"></div>
+    </div>
+  </div>
+
+  <header id="appHeader" class="hidden">
     <span id="title">🍽️ ミール健康管理</span>
     <span class="tagline">今日もおいしく、健康に 🌱</span>
+    <button id="signOutBtn" class="signout" title="ログアウト">ログアウト</button>
   </header>
 
-  <main>
+  <main class="hidden">
     <!-- ===== ホーム（AI傾向分析） ===== -->
     <section id="screen-home" class="screen active">
       <div class="todaycard">
@@ -151,7 +162,7 @@
     </section>
   </main>
 
-  <nav id="tabbar">
+  <nav id="tabbar" class="hidden">
     <button data-screen="home" class="active">🏠<span>ホーム</span></button>
     <button data-screen="capture">📷<span>記録</span></button>
     <button data-screen="graph">📊<span>グラフ</span></button>
